@@ -1,0 +1,21 @@
+[package]
+name = "ng-i18n"
+description = " An i18n utility for Angular "
+repository = "https://github.com/local-interloper/ng-i18n"
+readme = "README.md"
+
+version = "0.1.0"
+edition = "2021"
+
+authors = ["local.interloper <marinoljubetic8@gmail.com>"]
+license = "GPL-3.0"
+
+keywords = ["angular", "web", "i18n", "tool"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+clap = { version = "4.5.21", features = ["derive"] }
+colored = "2.1.0"
+regex = "1.11.1"
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
