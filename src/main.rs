@@ -6,7 +6,6 @@ use std::process::ExitCode;
 
 mod core;
 mod types;
-
 fn main() -> ExitCode {
     let args = ProgramArgs::parse();
 

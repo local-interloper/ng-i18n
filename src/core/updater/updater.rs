@@ -112,7 +112,7 @@ impl Updater {
         let source = TranslationFile::try_from_path(&source_path)?;
 
         for i18n_path in i18n_paths {
-            source.write_or_extend(i18n_path)?
+            source.write_or_extend(i18n_path, true)?
         }
 
         Ok(())

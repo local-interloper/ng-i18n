@@ -22,6 +22,19 @@ impl TranslationFile {
         }
     }
 
+    pub fn reduce_to(&mut self, other: &TranslationFile) {
+        let target_keys: Vec<String> = self
+            .translations
+            .keys()
+            .filter(|key| !other.translations.contains_key(*key))
+            .cloned()
+            .collect();
+
+        for key in &target_keys {
+            self.translations.remove(key);
+        }
+    }
+
     pub fn try_from_path(path: &PathBuf) -> Result<Self, Box<dyn Error>> {
         let file = OpenOptions::new().read(true).open(path)?;
 
@@ -40,10 +53,13 @@ impl TranslationFile {
         Ok(())
     }
 
-    pub fn write_or_extend(&self, path: &PathBuf) -> Result<(), Box<dyn Error>> {
+    pub fn write_or_extend(&self, path: &PathBuf, enforce_parity: bool) -> Result<(), Box<dyn Error>> {
         match Self::try_from_path(path) {
             Ok(mut other) => {
                 other.extend_with(self);
+                if  enforce_parity {
+                    other.reduce_to(self);
+                }
                 other.write(path)?;
             }
             Err(_) => {
