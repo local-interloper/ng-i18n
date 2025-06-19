@@ -44,7 +44,7 @@ impl TranslationFile {
     pub fn write(&self, path: &PathBuf) -> Result<(), Box<dyn Error>> {
         let file = OpenOptions::new()
             .create(true)
-            .truncate(false)
+            .truncate(true)
             .write(true)
             .open(path)?;
 
@@ -57,7 +57,7 @@ impl TranslationFile {
         match Self::try_from_path(path) {
             Ok(mut other) => {
                 other.extend_with(self);
-                if  enforce_parity {
+                if enforce_parity {
                     other.reduce_to(self);
                 }
                 other.write(path)?;
