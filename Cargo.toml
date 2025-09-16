@@ -1,10 +1,10 @@
 [package]
 name = "ng-i18n"
-description = " An i18n utility for Angular "
+description = "An i18n utility for Angular "
 repository = "https://github.com/local-interloper/ng-i18n"
 readme = "README.md"
 
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 
 authors = ["local.interloper <marinoljubetic8@gmail.com>"]

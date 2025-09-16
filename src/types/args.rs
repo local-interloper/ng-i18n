@@ -20,11 +20,29 @@ pub struct UpdaterArgs {
     /// in case it doesn't exist
     #[arg(long)]
     pub no_extract: bool,
+
+    /// Define which i18n-extract configuration to use
+    #[arg(long)]
+    pub configuraiton: Option<String>,
+}
+
+#[derive(Args)]
+pub struct MergerArgs {
+    /// List of files to merge
+    #[arg()]
+    pub target_files: Vec<String>,
+
+    /// Merged output destination
+    #[arg()]
+    pub output_path: Option<String>,
 }
 
 #[derive(Subcommand)]
 pub enum Subcommands {
-    Update (UpdaterArgs),
+    /// Used to update i18n files
+    Update(UpdaterArgs),
+    /// Used to merge multiple i18n files
+    Merge(MergerArgs),
 }
 
 #[derive(Parser)]
@@ -32,5 +50,5 @@ pub enum Subcommands {
 #[command(propagate_version = true)]
 pub struct ProgramArgs {
     #[command(subcommand)]
-    pub command: Subcommands
+    pub command: Subcommands,
 }

@@ -6,13 +6,13 @@ use std::io::{BufReader, BufWriter};
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
-pub struct TranslationFile {
+pub struct I18nFile {
     locale: String,
     translations: BTreeMap<String, String>,
 }
 
-impl TranslationFile {
-    pub fn extend_with(&mut self, other: &TranslationFile) {
+impl I18nFile {
+    pub fn extend_with(&mut self, other: &I18nFile) {
         for (key, text) in &other.translations {
             if self.translations.contains_key(key) {
                 continue;
@@ -22,7 +22,7 @@ impl TranslationFile {
         }
     }
 
-    pub fn reduce_to(&mut self, other: &TranslationFile) {
+    pub fn reduce_to(&mut self, other: &I18nFile) {
         let target_keys: Vec<String> = self
             .translations
             .keys()
@@ -35,7 +35,13 @@ impl TranslationFile {
         }
     }
 
-    pub fn try_from_path(path: &PathBuf) -> Result<Self, Box<dyn Error>> {
+    pub fn try_from_pathbuf(path: &PathBuf) -> Result<Self, Box<dyn Error>> {
+        let file = OpenOptions::new().read(true).open(path)?;
+
+        Ok(serde_json::from_reader(BufReader::new(file))?)
+    }
+
+    pub fn try_from_path(path: &String) -> Result<Self, Box<dyn Error>> {
         let file = OpenOptions::new().read(true).open(path)?;
 
         Ok(serde_json::from_reader(BufReader::new(file))?)
@@ -54,7 +60,7 @@ impl TranslationFile {
     }
 
     pub fn write_or_extend(&self, path: &PathBuf, enforce_parity: bool) -> Result<(), Box<dyn Error>> {
-        match Self::try_from_path(path) {
+        match Self::try_from_pathbuf(path) {
             Ok(mut other) => {
                 other.extend_with(self);
                 if enforce_parity {
@@ -71,7 +77,7 @@ impl TranslationFile {
     }
 }
 
-impl Default for TranslationFile {
+impl Default for I18nFile {
     fn default() -> Self {
         Self {
             locale: "en-US".to_string(),

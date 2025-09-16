@@ -3,45 +3,45 @@ use crate::core::updater::updater_error::UpdaterErrorKind::{
     FailedToExtractI18n, NotAnAngularProject,
 };
 use crate::types::args::UpdaterArgs;
-use crate::types::translation_file::TranslationFile;
+use crate::types::i18n_file::I18nFile;
 use regex::Regex;
 use std::error::Error;
 use std::path::PathBuf;
 use std::process::Command;
 
 pub struct Updater {
-    config: UpdaterArgs,
+    args: UpdaterArgs,
 }
 
 impl Updater {
     pub fn new(config: UpdaterArgs) -> Self {
-        Self { config }
+        Self { args: config }
     }
 
     pub fn update(&self) -> Result<(), Box<dyn Error>> {
         Self::check_for_root()?;
 
         let source_path = self
-            .config
+            .args
             .source_path
             .clone()
             .unwrap_or("./i18n/messages.json".into());
 
-        if !self.config.no_extract {
+        if !self.args.no_extract {
             let mut i18n_dir_path = PathBuf::from(&source_path);
 
             i18n_dir_path.pop();
 
             let i18n_dir_path = i18n_dir_path.to_string_lossy().to_string();
 
-            Self::extract_i18n(&i18n_dir_path)?;
+            Self::extract_i18n(&i18n_dir_path, self.args.configuraiton.clone())?;
         }
 
-        if !self.config.no_sort {
+        if !self.args.no_sort {
             Self::sort_and_write_source(&source_path)?;
         }
 
-        let i18n_paths = Self::get_i18n_paths(&source_path, &self.config.target_languages)?;
+        let i18n_paths = Self::get_i18n_paths(&source_path, &self.args.target_languages)?;
 
         Self::update_i18n(&source_path, &i18n_paths)?;
 
@@ -56,11 +56,12 @@ impl Updater {
         Ok(())
     }
 
-    fn extract_i18n(output_path: &str) -> Result<String, Box<dyn Error>> {
+    fn extract_i18n(output_path: &str, config: Option<String>) -> Result<String, Box<dyn Error>> {
         let out = Command::new("ng")
             .arg("extract-i18n")
             .args(["--format", "json"])
             .args(["--output-path", output_path])
+            .args(["c", config.unwrap_or("".to_string()).as_str()])
             .output()?;
 
         if !out.status.success() {
@@ -109,7 +110,7 @@ impl Updater {
 
     fn update_i18n(source_path: &String, i18n_paths: &Vec<PathBuf>) -> Result<(), Box<dyn Error>> {
         let source_path = PathBuf::from(source_path);
-        let source = TranslationFile::try_from_path(&source_path)?;
+        let source = I18nFile::try_from_pathbuf(&source_path)?;
 
         for i18n_path in i18n_paths {
             source.write_or_extend(i18n_path, true)?
@@ -120,7 +121,7 @@ impl Updater {
 
     fn sort_and_write_source(source_path: &String) -> Result<(), Box<dyn Error>> {
         let source_path = PathBuf::from(source_path);
-        let source = TranslationFile::try_from_path(&source_path)?;
+        let source = I18nFile::try_from_pathbuf(&source_path)?;
         source.write(&source_path)?;
 
         Ok(())
